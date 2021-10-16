@@ -1391,8 +1391,7 @@ int ScreenRecoveryUI::ScrollMenu(int updown) {
 }
 
 size_t ScreenRecoveryUI::ShowMenu(std::unique_ptr<Menu>&& menu, bool menu_only,
-                                  const std::function<int(int, bool)>& key_handler,
-                                  bool refreshable) {
+                                  const std::function<int(int, bool)>& key_handler) {
   // Throw away keys pressed previously, so user doesn't accidentally trigger menu items.
   FlushKeys();
 
@@ -1440,7 +1439,6 @@ size_t ScreenRecoveryUI::ShowMenu(std::unique_ptr<Menu>&& menu, bool menu_only,
       bool visible = IsTextVisible();
       action = key_handler(evt.key(), visible);
     }
-
     if (action < 0) {
       switch (action) {
         case Device::kHighlightUp:
@@ -1473,18 +1471,13 @@ size_t ScreenRecoveryUI::ShowMenu(std::unique_ptr<Menu>&& menu, bool menu_only,
         case Device::kDoSideload:
           chosen_item = Device::kDoSideload;
           break;
-        case Device::kRefresh:
-          if (refreshable) {
-            chosen_item = Device::kRefresh;
-          }
-          break;
       }
     } else if (!menu_only) {
       chosen_item = action;
     }
 
     if (chosen_item == Device::kGoBack || chosen_item == Device::kGoHome ||
-        chosen_item == Device::kDoSideload || chosen_item == Device::kRefresh) {
+        chosen_item == Device::kDoSideload) {
       break;
     }
   }
@@ -1497,14 +1490,13 @@ size_t ScreenRecoveryUI::ShowMenu(std::unique_ptr<Menu>&& menu, bool menu_only,
 size_t ScreenRecoveryUI::ShowMenu(const std::vector<std::string>& headers,
                                   const std::vector<std::string>& items, size_t initial_selection,
                                   bool menu_only,
-                                  const std::function<int(int, bool)>& key_handler,
-                                  bool refreshable) {
+                                  const std::function<int(int, bool)>& key_handler) {
   auto menu = CreateMenu(headers, items, initial_selection);
   if (menu == nullptr) {
     return initial_selection;
   }
 
-  return ShowMenu(std::move(menu), menu_only, key_handler, refreshable);
+  return ShowMenu(std::move(menu), menu_only, key_handler);
 }
 
 size_t ScreenRecoveryUI::ShowPromptWipeDataMenu(const std::vector<std::string>& backup_headers,
